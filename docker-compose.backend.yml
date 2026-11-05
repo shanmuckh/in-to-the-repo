@@ -1,0 +1,163 @@
+services:
+  # PostgreSQL Database with pgvector extension
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: into_the_repo_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-repo_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-repo_password}
+      POSTGRES_DB: ${DB_NAME:-into_the_repo}
+      PGDATA: /var/lib/postgresql/data/pgdata
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-repo_user} -d ${DB_NAME:-into_the_repo}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    networks:
+      - app_network
+
+  # Redis Cache & Celery Broker
+  redis:
+    image: redis:7-alpine
+    container_name: into_the_repo_redis
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: always
+    networks:
+      - app_network
+    sysctls:
+      - net.core.somaxconn=65535
+
+  # FastAPI Backend API Server
+  backend:
+    image: ghcr.io/gourav1632/into-the-repo/backend:latest
+    container_name: into_the_repo_backend
+    environment:
+      # Database
+      DATABASE_URL: postgresql://${DB_USER:-repo_user}:${DB_PASSWORD:-repo_password}@db:5432/${DB_NAME:-into_the_repo}
+      
+      # Redis
+      REDIS_URL: redis://redis:6379/0
+      
+      # Authentication
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 10080
+      
+      # External APIs
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      
+      # CORS - Allow Vercel frontend
+      FRONTEND_HOST: ${FRONTEND_HOST:-*}
+      
+      # App Configuration
+      PYTHONUNBUFFERED: 1
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    expose:
+      - "8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - backend_logs:/app/logs
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --workers 4
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - app_network
+
+  # Celery Worker for Async Repository Analysis
+  celery_worker:
+    image: ghcr.io/gourav1632/into-the-repo/backend:latest
+    container_name: into_the_repo_celery_worker
+    environment:
+      # Database
+      DATABASE_URL: postgresql://${DB_USER:-repo_user}:${DB_PASSWORD:-repo_password}@db:5432/${DB_NAME:-into_the_repo}
+      
+      # Redis
+      REDIS_URL: redis://redis:6379/0
+      
+      # Authentication
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      
+      # External APIs
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      
+      # Celery Configuration
+      PYTHONUNBUFFERED: 1
+      C_FORCE_ROOT: true
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    volumes:
+      - backend_logs:/app/logs
+      - celery_temp:/tmp/repo_clone
+    command: celery -A src.tasks.worker worker --loglevel=info --concurrency=4 --max-tasks-per-child=100
+    restart: always
+    networks:
+      - app_network
+
+  # Caddy Reverse Proxy with Auto SSL
+  caddy:
+    image: caddy:2-alpine
+    container_name: into_the_repo_caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+    restart: always
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  celery_temp:
+    driver: local
+  backend_logs:
+    driver: local
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+
+networks:
+  app_network:
+    driver: bridge

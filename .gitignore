@@ -1,0 +1,20 @@
+.DS_Store
+node_modules/
+
+# Backend
+backend/.venv/
+backend/.env
+**/__pycache__/
+*.pyc
+.pytest_cache/
+htmlcov/
+backend/src/logs/
+backend/logs/
+
+# Frontend
+frontend/.next/
+frontend/out/
+frontend/.env*.local
+
+# Root .env used by docker compose
+.env

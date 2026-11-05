@@ -1,0 +1,102 @@
+# Development Docker Compose with hot-reloading
+version: '3.8'
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: into_the_repo_db_dev
+    environment:
+      POSTGRES_USER: repo_user
+      POSTGRES_PASSWORD: repo_password
+      POSTGRES_DB: into_the_repo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: into_the_repo_redis_dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_dev:/data
+    networks:
+      - app_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: dockerfile
+      target: development
+    container_name: into_the_repo_backend_dev
+    environment:
+      DATABASE_URL: postgresql://repo_user:repo_password@db:5432/into_the_repo
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: dev-secret-key-not-for-production
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend:/app
+      - /app/.venv
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - app_network
+
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: dockerfile
+      target: development
+    container_name: into_the_repo_celery_dev
+    environment:
+      DATABASE_URL: postgresql://repo_user:repo_password@db:5432/into_the_repo
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: dev-secret-key-not-for-production
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      PYTHONUNBUFFERED: 1
+      C_FORCE_ROOT: true
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend:/app
+      - /app/.venv
+    command: celery -A src.tasks.worker worker --loglevel=debug --concurrency=2
+    networks:
+      - app_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: into_the_repo_frontend_dev
+    environment:
+      NEXT_PUBLIC_HOST: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - app_network
+
+volumes:
+  postgres_data_dev:
+  redis_data_dev:
+
+networks:
+  app_network:
+    driver: bridge
