@@ -2,29 +2,19 @@
 
 # In to the Repo
 
-### Understand any GitHub repository in minutes, not weeks.
-
-Paste a repo URL. In to the Repo clones it, parses every file into a syntax tree,
-maps how the code fits together, digs through its git history, and gives you an
-AI guide that explains any file line by line.
-
-[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/shanmuckh)
-[![License: All rights reserved](https://img.shields.io/badge/License-All%20rights%20reserved-a855f7?style=for-the-badge)](LICENSE)
-
-![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=nextdotjs)
-![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)
-![Celery](https://img.shields.io/badge/Celery-5.4-37814A?style=flat-square&logo=celery&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat-square&logo=redis&logoColor=white)
-![Gemini](https://img.shields.io/badge/Google%20Gemini-AI-8E75B2?style=flat-square&logo=googlegemini&logoColor=white)
+Understand any GitHub repository in minutes, not weeks.
 
 <br/>
 
 <img src="docs/screenshots/01-home.png" alt="In to the Repo home screen" width="900"/>
 
+<br/>
+
 </div>
+
+Paste a repo URL. In to the Repo clones it, parses every file into a syntax tree,
+maps how the code fits together, digs through its git history, and gives you an
+AI guide that explains any file line by line.
 
 ---
 
@@ -273,7 +263,7 @@ contribution may be used as part of this project under its [license](LICENSE).
 If In to the Repo saves you time, please consider sponsoring its development. It funds
 the hosting and AI costs and keeps new features coming.
 
-<a href="https://github.com/sponsors/shanmuckh"><img src="https://img.shields.io/badge/Sponsor%20on%20GitHub-%E2%9D%A4-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor shanmuckh on GitHub"/></a>
+**[Become a sponsor →](https://github.com/sponsors/shanmuckh)**
 
 ---
 
