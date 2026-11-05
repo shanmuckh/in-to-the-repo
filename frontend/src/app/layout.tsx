@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Into the Repo",
+  title: "In to the Repo",
   description: "A powerful tool that analyzes codebases and creates interactive maps, dependency graphs, and tutorials to speed up developer onboarding and code understanding.",
 };
 

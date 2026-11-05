@@ -2,7 +2,7 @@ import React, { useState,useEffect } from "react";
 import { ReactFlow, Controls } from "@xyflow/react";
 import type { Node as FlowNode } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { getLayoutedGraph } from "@/components/Graph/Layout";
+import { getLayoutedGraph, graphViewProps } from '@/components/Graph/Layout';
 import { FileAnalysis } from "@/types/file_analysis_type";
 import {
   ASTFileData,
@@ -133,7 +133,7 @@ function DependencyGraph({
           <ReactFlow
             defaultNodes={nodes}
             defaultEdges={edges}
-            fitView
+            {...graphViewProps}
             proOptions={proOptions}
             nodesDraggable
             onNodeClick={handleNodeClick}

@@ -10,7 +10,7 @@ from src.core.logging import get_logger
 
 logger = get_logger(__name__)
 
-from src.services.ai.gemini_client import get_client, GEMINI_MODEL
+from src.services.ai.gemini_client import generate
 
 SYSTEM_PROMPT = {
     "parts": [
@@ -109,10 +109,7 @@ def askAI(
         
         final_prompt = conversation_context + f"\nuser: {full_message}" if conversation_context else full_message
         
-        response = get_client().models.generate_content(
-            model=GEMINI_MODEL,
-            contents=final_prompt
-        )
+        response = generate(final_prompt, response_mime_type="application/json")
         response_text = response.text.strip()
 
         # Clean JSON response

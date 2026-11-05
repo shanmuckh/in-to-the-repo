@@ -1,6 +1,6 @@
 import { openDB, IDBPDatabase } from 'idb';
 
-const DB_NAME = 'into-the-repo';
+const DB_NAME = 'in-to-the-repo';
 const STORE_NAME = 'keyval-store';
 
 let dbPromise: Promise<IDBPDatabase> | null = null;

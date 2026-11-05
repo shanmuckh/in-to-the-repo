@@ -23,6 +23,20 @@ def is_third_party_module(module_name, language):
     return False  
 
 
+def resolve_python_relative(module: str, current_file_path: str) -> str:
+    """
+    Resolve a relative Python module to a repo-relative path (no extension).
+    `.ctx` in src/flask/app.py -> src/flask/ctx; `..utils` -> one package up;
+    a bare `.` -> the package itself (src/flask, matched to __init__ later).
+    """
+    dots = len(module) - len(module.lstrip('.'))
+    base = os.path.dirname(current_file_path.replace(os.sep, "/"))
+    for _ in range(dots - 1):
+        base = os.path.dirname(base)
+    rest = module[dots:].replace('.', '/')
+    return "/".join(p for p in (base, rest) if p)
+
+
 def extract_import_data(node, code, language, current_file_path: Optional[str] = None):
 
     import_info = {
@@ -44,15 +58,9 @@ def extract_import_data(node, code, language, current_file_path: Optional[str] =
             if module_node:
                 module = module_node.text.decode()
                 
-                if module.startswith(('.', '..')):
+                if module.startswith('.'):
                     if current_file_path:
-                        current_dir_rel = os.path.dirname(current_file_path)
-                        dummy_root = "/repo_root_placeholder" 
-                        temp_current_dir_abs = os.path.join(dummy_root, current_dir_rel)
-                        temp_resolved_module_path_abs = os.path.abspath(os.path.join(temp_current_dir_abs, module))
-                        resolved_module_path_rel = os.path.relpath(temp_resolved_module_path_abs, dummy_root)
-                        
-                        import_info["source_module"] = resolved_module_path_rel.replace(os.sep, "/")
+                        import_info["source_module"] = resolve_python_relative(module, current_file_path)
                         import_info["metadata"]["is_third_party"] = False # Relative imports are always first-party
                     else:
                         print(f"Warning: Missing current_file_path for relative Python import '{module}'")

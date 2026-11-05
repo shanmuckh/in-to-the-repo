@@ -10,7 +10,7 @@ from src.core.logging import get_logger
 
 logger = get_logger(__name__)
 
-from src.services.ai.gemini_client import get_client, GEMINI_MODEL
+from src.services.ai.gemini_client import generate
 
 def get_code_from_file(repo_url: str, branch: str, relative_path: str) -> str:
     owner, repo = extract_owner_repo(repo_url)
@@ -53,11 +53,7 @@ def analyze_code(repo_url: str, branch: str, relative_path: str, is_authenticate
     )
 
     try:
-        response = get_client().models.generate_content(
-            model=GEMINI_MODEL,
-            contents=prompt,
-            config={"response_mime_type": "application/json"},
-        )
+        response = generate(prompt, response_mime_type="application/json")
         response_text = response.text
 
         cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", response_text.strip(), flags=re.IGNORECASE)

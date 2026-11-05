@@ -1,483 +1,294 @@
-# Into the Repo
+<div align="center">
 
-**Into the Repo** is an AI-powered developer onboarding platform that streamlines the process of understanding large GitHub repositories. It automatically analyzes codebases to generate interactive architecture maps, highlight key code insights, and deliver personalized onboarding tutorials.
+# In to the Repo
 
-**Live Demo:** [https://into-the-repo.vercel.app](https://into-the-repo.vercel.app)
+### Understand any GitHub repository in minutes, not weeks.
 
-## Features
+Paste a repo URL. In to the Repo clones it, parses every file into a syntax tree,
+maps how the code fits together, digs through its git history, and gives you an
+AI guide that explains any file line by line.
 
-- **Codebase Analysis:** Parses large codebases (100K+ lines) using Tree-sitter for AST-level understanding
-- **AI-Powered Summarization:** Extracts and ranks critical files with >90% accuracy based on Git history frequency analysis
-- **Architecture Mapping:** Auto-generates visual dependency graphs and call flow diagrams
-- **Interactive File Analysis:** Deep-dive into any file with AI-generated summaries and insights
-- **Smart Caching:** Commit-SHA-based caching prevents redundant analysis of unchanged repositories
-- **Analysis History:** Complete audit trail of all repository analyses for authenticated users
-- **AI Code Assistant:** Chat with your codebase using context-aware AI (authenticated users only)
-- **High Performance:** Async task processing with real-time progress updates via Server-Sent Events (SSE)
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/shanmuckh)
+[![License: All rights reserved](https://img.shields.io/badge/License-All%20rights%20reserved-a855f7?style=for-the-badge)](LICENSE)
 
-## Tech Stack
+![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=nextdotjs)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)
+![Celery](https://img.shields.io/badge/Celery-5.4-37814A?style=flat-square&logo=celery&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat-square&logo=redis&logoColor=white)
+![Gemini](https://img.shields.io/badge/Google%20Gemini-AI-8E75B2?style=flat-square&logo=googlegemini&logoColor=white)
 
-### Frontend
-- **Framework:** Next.js 14 (App Router), TypeScript, React 19
-- **UI Libraries:** Tailwind CSS, Radix UI, Framer Motion
-- **Visualization:** React Flow (architecture graphs), Dagre (layout)
-- **State:** React hooks, SessionStorage (temporary state), IndexedDB (UI cache only)
-- **HTTP Client:** Axios
+<br/>
 
-### Backend
-- **API Framework:** FastAPI (Python)
-- **Task Queue:** Celery with Redis broker
-- **Code Parsing:** Tree-sitter (multi-language AST parsing)
-- **Database:** PostgreSQL with SQLAlchemy ORM
-- **Caching:** Redis (Celery broker + chat history)
-- **Authentication:** JWT tokens with bcrypt password hashing
-- **External APIs:** GitHub API (commit tracking), Gemini AI (code analysis)
-- **Real-time Updates:** Server-Sent Events (SSE)
+<img src="docs/screenshots/01-home.png" alt="In to the Repo home screen" width="900"/>
 
-## System Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         CLIENT LAYER                                 │
-├─────────────────────────────────────────────────────────────────────┤
-│  Next.js Frontend (Port 3000)                                        │
-│  ├─ Auth Pages (Login/Signup)                                       │
-│  ├─ Analysis Dashboard (Architecture, Files, Git, Dependencies)     │
-│  ├─ History Page (Past Analyses - Auth Required)                    │
-│  ├─ AI Assistant (Code Chat - Auth Required)                        │
-│  └─ Storage: JWT (localStorage) + UI Cache (IndexedDB)              │
-└────────────────────────█──────────────────────────────────────────────┘
-                         │ HTTP/HTTPS + SSE
-                         ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                      BACKEND API LAYER                               │
-├─────────────────────────────────────────────────────────────────────┤
-│  FastAPI Application (Port 8000)                                    │
-│  ├─ POST /api/auth/signup & /api/auth/login                        │
-│  ├─ POST /api/verify (Validate repo & branch)                      │
-│  ├─ POST /api/analyze (Queue Celery task, return task_id)          │
-│  ├─ GET  /api/progress?request_id={id} (SSE stream)                │
-│  ├─ GET  /api/analyze/status/{task_id} (Poll task status)          │
-│  ├─ GET  /api/analysis/{id} (Fetch cached analysis)                │
-│  ├─ GET  /api/user/history (Auth required)                         │
-│  └─ POST /api/ask (AI assistant - Auth required)                   │
-└────────────┬──────────────────────────────────────────────────────────┘
-             │
-             ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                      TASK QUEUE LAYER                                │
-├─────────────────────────────────────────────────────────────────────┤
-│  Celery Workers (16 async processes)                                │
-│  ├─ Task: analyze_repository(repo_url, branch, request_id, user_id)│
-│  ├─ 1. Fetch latest commit SHA (GitHub API)                        │
-│  ├─ 2. Check cache: EXISTS(repo_url, branch, commit_sha)?          │
-│  ├─ 3. If miss: Clone → Parse → Save                               │
-│  ├─ 4. If hit: Skip clone/parse, use cached                        │
-│  └─ 5. Create history entry (audit trail)                          │
-└────────┬──────────────────────────┬──────────────────────────────────┘
-         │                          │
-         ▼                          ▼
-    [SERVICE LAYER]           [PERSISTENCE]
-    ┌────────────────┐        ┌──────────────────────┐
-    │ Git Utils      │────┐   │ PostgreSQL Database  │
-    ├────────────────┤    │   ├──────────────────────┤
-    │ AST Parser     │    │   │ ├─ users             │
-    │ (Tree-sitter)  │    │   │ ├─ repo_analysis     │
-    ├────────────────┤    │   │ │  (JSONB cache)     │
-    │ Summarizer     │    └──▶│ ├─ user_analysis_    │
-    │ (Gemini AI)    │        │ │  history           │
-    ├────────────────┤        │ └─ chat_sessions     │
-    │ Graph Builder  │        │ └─ code_embeddings   │
-    │ File Analyzer  │        └──────────────────────┘
-    └────────┬───────┘
-             │
-             ▼
-    ┌──────────────────────────┐
-### 1. User Authentication
-```
-Browser → POST /api/auth/login
-       → FastAPI validates credentials
-       → PostgreSQL lookup
-       → JWT token returned
-       → Stored in localStorage
-```
-
-### 2. Repository Analysis (Async with Smart Caching)
-```
-Step 1: Submit Analysis
-   Browser → POST /api/analyze → Celery task queued → Returns task_id
-
-Step 2: Progress Tracking (Real-time)
-   Browser → SSE connection to /api/progress?request_id={id}
-          → Streams: "Cloning...", "Parsing...", "Analyzing..."
-          → Final event: "done"
-
-Step 3: Celery Worker Process
-   ├─ Fetch latest commit SHA (GitHub API - no clone needed)
-   ├─ Query: SELECT * WHERE repo_url + branch + commit_sha
-   ├─ CACHE HIT?
-   │  ├─ YES → Skip clone/parse, use cached data (instant)
-   │  └─ NO  → Clone (shallow) → Parse (Tree-sitter) → Save to DB
-   ├─ Create history entry (always, for audit trail)
-   └─ Return result with repo_analysis_id
-
-Step 4: Frontend Redirect
-   Browser → Polls /api/analyze/status/{task_id}
-          → Gets repo_analysis_id
-          → Redirects to /analyze?id={repo_analysis_id}
-          → Fetches from GET /api/analysis/{id}
-```
-
-### 3. History Tracking
-```
-Every analysis creates a UserAnalysisHistory entry:
-   - user_id (who ran it)
-### Quick start (macOS, no Docker)
-
-```bash
-brew install postgresql@16 redis   # once
-make services                      # start Postgres + Redis
-make setup                         # venv (Python 3.12), deps, backend/.env
-make dev                           # API :8000 + Celery worker + frontend :3000
-```
-
-Create the database once if it doesn't exist:
-`createuser repo_user -P` (password `repo_password`) then `createdb -O repo_user into_the_repo`.
-Add `GEMINI_API_KEY` to `backend/.env` for AI summaries/chat; everything else works without it.
-pgvector is optional (only the unused `code_embeddings` table needs it).
-
-### Prerequisites
-- **Node.js** 18+ and npm
-- **Python** 3.10+
-- **PostgreSQL** 14+
-- **Redis** 6+
-- **Git**
-- **GitHub Personal Access Token** (for API rate limits)
-- **Gemini API Key** (for AI features)
-
-### Backend Setup
-
-1. **Clone the repository**
-```bash
-git clone https://github.com/Gourav1632/into-the-repo.git
-cd into-the-repo
-```
-
-2. **Set up Python environment**
-```bash
-cd backend
-
-### Basic Flow
-
-1. **Open the app** at http://localhost:3000
-
-2. **Analyze a repository**
-   - Enter a GitHub repository URL (e.g., `https://github.com/facebook/react`)
-   - Enter branch name (e.g., `main`)
-   - Click "Verify" to validate
-   - Click "Analyze" to start
-
-3. **View Results**
-   - Real-time progress updates during analysis
-   - Automatically redirected to analysis dashboard
-   - Explore different views:
-     - **Architecture:** Visual dependency graph
-     - **File Analysis:** Deep-dive into specific files with AI summaries
-     - **Git Analysis:** Commit history, top contributors, change frequency
-     - **Dependencies:** Import/export relationships
-     - **Control Flow:** Function call graphs
-
-4. **Save to History (Optional)**
-   - Sign up or log in to save analyses
-   - Access past analyses anytime from `/history`
-   - Re-analyze only when new commits exist (smart caching)
-
-5. **AI Code Assistant (Authenticated Users)**
-   - Ask questions about the codebase
-   - Get context-aware explanations
-   - Chat history persisted per session
-
-### Sample Repositories to Try
-
-- **Small:** https://github.com/octocat/Hello-World (branch: `master`)
-- **Medium:** https://github.com/lodash/lodash (branch: `master`)
-- **Large:** https://github.com/facebook/react (branch: `main`)
-
-## Project Structure
-
-```
-into-the-repo/
-├── backend/
-│   ├── src/
-│   │   ├── api/              # FastAPI route handlers
-│   │   ├── core/             # Database, security, logging
-│   │   ├── models/           # SQLAlchemy models
-│   │   ├── schemas/          # Pydantic request/response schemas
-│   │   ├── services/         # Business logic
-│   │   │   ├── ai/           # Gemini integration, embeddings
-│   │   │   ├── analysis/     # AST parsing, graph building
-│   │   │   └── utilities/    # Git operations, caching
-│   │   ├── tasks/            # Celery worker tasks
-│   │   ├── middleware/       # Rate limiting
-│   │   └── main.py           # FastAPI app entry point
-│   ├── requirements.txt
-│   └── .env
-├── frontend/
-│   ├── src/
-│   │   ├── app/              # Next.js app router pages
-│   │   ├── components/       # React components
-│   │   ├── lib/              # Utilities
-│   │   ├── types/            # TypeScript types
-│   │   └── utils/            # API routes, auth, IndexedDB
-│   ├── package.json
-│   └── next.config.ts
-└── README.md
-```
-
-## Key Features Explained
-
-### Smart Commit-Based Caching
-- Every analysis stores the commit SHA
-- Re-analyzing the same commit? Instant results from cache
-- New commits? Fresh analysis triggered automatically
-- Reduces GitHub API calls and parsing time by ~95% for popular repos
-
-### Analysis History Audit Trail
-- Every analysis attempt logged (even if cached)
-- See when you analyzed a repo and what commit it was at
-- Re-analyze instantly or run fresh analysis
-
-### Async Task Processing
-- Long-running analysis runs in Celery worker processes
-- FastAPI returns immediately with task_id
-- Frontend subscribes to Server-Sent Events for real-time updates
-- Non-blocking, scalable architecture
-
-## Troubleshooting
-
-### Backend Issues
-
-**Celery worker not picking up tasks:**
-```bash
-# Check Redis connection
-redis-cli ping
-
-# Restart Celery worker
-pkill -f celery
-celery -A src.tasks.worker worker --loglevel=info
-```
-
-**Database errors:**
-```bash
-# Check if database exists
-psql -l | grep into_the_repo
-
-# Check connection
-psql postgresql://user:password@localhost:5432/into_the_repo
-```
-
-**GitHub API rate limit:**
-```bash
-# Add GITHUB_TOKEN to .env
-# Generate at: https://github.com/settings/tokens
-```
-
-### Frontend Issues
-
-**API connection errors:**
-- Ensure backend is running on port 8000
-- Check `frontend/src/utils/APIRoutes.ts` for correct host
-- Verify CORS is configured in FastAPI
-
-**Build errors:**
-```bash
-rm -rf .next node_modules
-npm install
-npm run dev
-```
-
-## Performance Metrics
-
-- **Analysis Time:** 5-30 seconds (depending on repo size)
-- **Cache Hit Rate:** ~85% for popular open-source repos
-- **Supported Languages:** Python, JavaScript, TypeScript, Java, C++, Go, Rust, and more (via Tree-sitter)
-- **Max Repo Size:** Up to 500K lines of code (configurable)
-- **Concurrent Analyses:** 16 Celery workers (configurable)
-
-## Contributing
-
-Contributions welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License.
-
-## Acknowledgments
-
-- [Tree-sitter](https://tree-sitter.github.io/) for multi-language AST parsing
-- [GitHub API](https://docs.github.com/en/rest) for repository metadata
-- [Google Gemini](https://ai.google.dev/) for AI code analysis
-- [FastAPI](https://fastapi.tiangolo.com/) for the backend framework
-- [Next.js](https://nextjs.org/) for the frontend framework
-- [Celery](https://docs.celeryq.dev/) for distributed task queue
-# Database
-DATABASE_URL=postgresql://user:password@localhost:5432/into_the_repo
-
-# Redis
-REDIS_URL=redis://localhost:6379/0
-
-# Authentication
-SECRET_KEY=your-secret-key-here  # Generate: openssl rand -hex 32
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=10080  # 7 days
-
-# External APIs
-GITHUB_TOKEN=ghp_your_github_token
-GEMINI_API_KEY=your_gemini_api_key
-```
-
-4. **Set up the database**
-```bash
-# Create database
-createdb into_the_repo
-
-# Run migrations (if any exist)
-# psql -U your_user -d into_the_repo -f migrations/add_last_commit_sha.sql
-```
-
-5. **Start Redis**
-```bash
-# Ubuntu/Debian
-sudo systemctl start redis
-
-# macOS with Homebrew
-brew services start redis
-
-# Or run manually
-redis-server
-```
-
-6. **Start FastAPI server**
-```bash
-# In backend/ with venv activated
-uvicorn src.main:app --reload --port 8000
-```
-
-7. **Start Celery worker (separate terminal)**
-```bash
-# In backend/ with venv activated
-celery -A src.tasks.worker worker --loglevel=info
-```
-
-### Frontend Setup
-
-1. **Install dependencies**
-```bash
-cd frontend
-npm install
-```
-
-2. **Configure API endpoint (if needed)**
-```bash
-# frontend/src/utils/APIRoutes.ts already points to http://localhost:8000
-# Change if your backend runs on a different port
-```
-
-3. **Start development server**
-```bash
-npm run dev
-```
-
-The app will be available at:
-- **Frontend:** http://localhost:3000
-- **Backend API:** http://localhost:8000
-- **API Docs:** http://localhost:8000/docs
-
-### Verify Installation
-
-Check all services are running:
-```bash
-# Check Redis
-redis-cli ping  # Should return: PONG
-
-# Check PostgreSQL
-psql -U your_user -d into_the_repo -c "\dt"  # Should list tables
-
-# Check FastAPI
-curl http://localhost:8000/docs  # Should return 200
-
-# Check Celery
-# Look for "celery@hostname ready" in terminal
-Scenario B: Re-analyze (no new commits)
-   └─> Cache HIT → Instant results (no clone/parse)
-
-Scenario C: New commits pushed
-   └─> Cache MISS (different SHA) → Fresh analysis
-
-Benefits:
-   ✓ Popular repos cached indefinitely
-   ✓ No redundant parsing
-   ✓ Automatic invalidation on new commits
-```
-
-### 5. AI Code Assistant
-```
-User Query → POST /api/ask (auth required)
-           → Load chat history from Redis (session_id)
-           → Optionally load code context from analysis
-           → Send to Gemini API with context
-           → Save response to Redis (1h TTL)
-           → Return answer
-   New Request → PostgreSQL JSONB Cache → Instant Response (no re-parsing)
-
-4. AI CHAT WITH CONTEXT
-   User Query + Code → Redis Session → Gemini API → JSON Response
-   (Chat history persisted for 1 hour per session)
-
-5. PERFORMANCE OPTIMIZATION
-   ├─ Shallow Git Clone: ~90% faster ingestion
-   ├─ Smart Cache: Skip re-parsing for popular repos
-   ├─ Async Tasks: Non-blocking API responses
-   └─ Redis Caching: Stateless horizontal scaling
-```
-
-## Performance Metrics
-
-- **Analysis Time:** 5-30 seconds (depending on repo size)
-- **Cache Hit Rate:** ~85% for popular open-source repos
-- **Supported Languages:** Python, JavaScript, TypeScript, Java, C++, Go, Rust, and more (via Tree-sitter)
-- **Max Repo Size:** Up to 500K lines of code (configurable)
-- **Concurrent Analyses:** 16 Celery workers (configurable)
-
-## Contributing
-
-Contributions welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License.
-
-## Acknowledgments
-
-- [Tree-sitter](https://tree-sitter.github.io/) for multi-language AST parsing
-- [GitHub API](https://docs.github.com/en/rest) for repository metadata
-- [Google Gemini](https://ai.google.dev/) for AI code analysis
-- [FastAPI](https://fastapi.tiangolo.com/) for the backend framework
-- [Next.js](https://nextjs.org/) for the frontend framework
-- [Celery](https://docs.celeryq.dev/) for distributed task queue
+</div>
 
 ---
 
-Built by [Gourav Kumar](https://gouavkumar.netlify.app)
+## Why In to the Repo?
+
+Joining a new codebase usually means days of clicking through folders, guessing which
+files matter, and reading code without context. In to the Repo turns that into a guided tour:
+
+- **See the whole system at once.** An interactive architecture map shows which modules depend on which.
+- **Know where to look first.** Git history shows the files that change most and the people who change them.
+- **Understand any file quickly.** The AI writes a plain-English summary and a step-by-step tutorial tied to the actual line numbers.
+- **Ask questions.** A built-in assistant answers questions about the code you're reading.
+
+It's built for engineers onboarding onto a new team, open-source contributors sizing up
+a project, reviewers, students learning from real-world code, and tech leads auditing
+an unfamiliar service.
+
+---
+
+## Feature tour
+
+### 1. Analyze any public repository
+Enter a GitHub URL and branch. In to the Repo checks that the repository and branch exist,
+then queues the analysis in the background and shows live progress while it works.
+
+<img src="docs/screenshots/02-analyzing.png" alt="Live analysis progress" width="900"/>
+
+### 2. Your repository dashboard
+Every view is one click away from the floating dock: the architecture map, git analysis,
+file analysis, file graph, call graph, tutorial and assistant.
+
+<img src="docs/screenshots/03-dashboard.png" alt="Analysis dashboard" width="900"/>
+
+### 3. Architecture map
+An interactive, zoomable graph of how every file imports every other file. It resolves
+relative imports, packages (`__init__.py`, `index.ts`) and `src/`-layout projects, so the
+connections reflect the real structure. Click a node for its details.
+
+<img src="docs/screenshots/04-architecture.png" alt="Architecture map of the Flask repository" width="900"/>
+
+### 4. Git analysis
+Contributors, the most frequently changed files (the usual hot spots), and a readable
+timeline of recent commits, read from the real commit history.
+
+<img src="docs/screenshots/05-git-analysis.png" alt="Git analysis view" width="900"/>
+
+### 5. AI file analysis
+Pick any file to get an AI-written summary of what it does and why it exists, next to
+the source code.
+
+<img src="docs/screenshots/08-file-analysis.png" alt="AI file summary" width="900"/>
+
+### 6. Step-by-step tutorials
+The AI walks through the file in order, and each step links to the exact lines it explains.
+
+<img src="docs/screenshots/09-tutorial.png" alt="AI tutorial with line references" width="900"/>
+
+### 7. File graph and call graph
+See a file's classes and functions, then follow who calls what inside it.
+
+<p>
+  <img src="docs/screenshots/06-file-graph.png" alt="File graph" width="440"/>
+  <img src="docs/screenshots/07-call-graph.png" alt="Call graph" width="440"/>
+</p>
+
+### 8. AI code assistant
+Ask anything about the file you're looking at. The conversation keeps its context, so
+you can ask follow-up questions.
+
+<img src="docs/screenshots/11-assistant.png" alt="AI code assistant" width="900"/>
+
+### 9. Accounts and history
+Sign in to keep a history of every repository you've analyzed and reopen any of them instantly.
+
+<img src="docs/screenshots/10-history.png" alt="Analysis history" width="900"/>
+
+---
+
+## Built for speed
+
+| | |
+|---|---|
+| **Commit-aware caching** | Results are stored per commit. Analyzing the same commit again returns instantly, and new commits trigger a fresh analysis automatically. |
+| **Single-pass git history** | One `git log` pass replaces thousands of per-file git calls. It parses about 1,200 files in roughly a second. |
+| **Blobless clones** | Fetches 50 commits of history without downloading old file contents. |
+| **Background workers** | Celery runs analyses outside the API, so it stays responsive while you watch progress live. |
+| **Lean storage** | Large results live in PostgreSQL, and Redis only holds what's needed to report progress. |
+
+---
+
+## How it works
+
+```mermaid
+flowchart LR
+    U[Browser<br/>Next.js + React Flow] -->|REST| A[FastAPI]
+    A -->|queue job| R[(Redis)]
+    R --> W[Celery worker]
+    W -->|blobless clone| G[GitHub]
+    W --> P[Tree-sitter parser<br/>Python · JS · TS · TSX · Java · C · C++]
+    W --> H[Git history<br/>single pass]
+    P & H --> DB[(PostgreSQL<br/>cached per commit)]
+    A --> DB
+    A -->|summaries, tutorials, chat| AI[Google Gemini]
+```
+
+1. **Verify:** confirms the repository is public and the branch exists.
+2. **Queue:** the API hands the job to a Celery worker and returns a task ID immediately.
+3. **Clone:** a blobless, history-aware clone (skipped entirely if this commit is already cached).
+4. **Parse:** Tree-sitter extracts imports, classes, functions, calls and complexity from every source file.
+5. **Map:** imports are resolved into a dependency graph, and git history becomes per-file stats.
+6. **Explain:** Gemini generates summaries, tutorials and chat answers when you open a file.
+
+---
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, React Flow + Dagre, Motion |
+| API | FastAPI, Pydantic, SlowAPI rate limiting, JWT auth with bcrypt |
+| Workers | Celery with a Redis broker |
+| Code intelligence | Tree-sitter grammars for Python, JavaScript, TypeScript, TSX, Java, C and C++ |
+| Data | PostgreSQL (SQLAlchemy), Redis |
+| AI | Google Gemini via `google-genai` |
+| Deployment | Docker Compose, Caddy (automatic HTTPS) |
+
+---
+
+## Run it locally
+
+**Prerequisites:** macOS or Linux, Node.js 18+, Python 3.12, PostgreSQL 16, Redis 7, Git,
+and a [Gemini API key](https://aistudio.google.com/apikey) (the AI features need one;
+everything else works without it).
+
+```bash
+git clone https://github.com/shanmuckh/in-to-the-repo.git
+cd in-to-the-repo
+```
+
+```bash
+brew install postgresql@16 redis   # macOS; use your package manager on Linux
+make services                      # start PostgreSQL + Redis
+```
+
+Create the database (one time only):
+
+```bash
+createuser repo_user -P            # password: repo_password
+createdb -O repo_user in_to_the_repo
+```
+
+```bash
+make setup                         # Python venv, dependencies, backend/.env
+```
+
+Add your key to `backend/.env`:
+
+```
+GEMINI_API_KEY=your-key-here
+```
+
+```bash
+make dev                           # API :8000, Celery worker, frontend :3000
+```
+
+Open **http://localhost:3000**, sign up, and analyze a repository. Some good ones to try:
+`https://github.com/pallets/flask` (`main`) and `https://github.com/pallets/click` (`main`).
+
+### Useful commands
+
+| Command | What it does |
+|---|---|
+| `make dev` | Start the API, the worker and the frontend together |
+| `make test` | Run the backend test suite |
+| `make health` | Check that the API, frontend, Redis and Postgres are up |
+| `make up` / `make down` | Start or stop everything with Docker Compose |
+
+### Configuration (`backend/.env`)
+
+| Variable | Required | Purpose |
+|---|---|---|
+| `DATABASE_URL` | yes | PostgreSQL connection string |
+| `REDIS_URL` | yes | Redis broker and progress store |
+| `SECRET_KEY` | yes | Signs login tokens (`make setup` generates one) |
+| `GEMINI_API_KEY` | for AI | Enables summaries, tutorials and the assistant |
+| `GEMINI_MODEL` | no | Main Gemini model (default `gemini-flash-latest`) |
+| `GEMINI_FALLBACK_MODEL` | no | Used automatically when the main model is overloaded (default `gemini-flash-lite-latest`) |
+| `GITHUB_TOKEN` | no | Raises GitHub API rate limits |
+| `GIT_HISTORY_DEPTH` | no | Number of commits to analyze (default `50`) |
+| `FRONTEND_HOST` | no | Extra origin allowed by CORS |
+
+---
+
+## Project structure
+
+```
+in-to-the-repo/
+├── backend/
+│   ├── src/
+│   │   ├── api/            # REST routes: analysis, auth, history, assistant
+│   │   ├── services/
+│   │   │   ├── analysis/   # Tree-sitter parsing, import resolution, graphs
+│   │   │   ├── ai/         # Gemini summaries, tutorials, chat
+│   │   │   └── utilities/  # git history, cloning, caching
+│   │   ├── tasks/          # Celery worker
+│   │   ├── models/         # SQLAlchemy models
+│   │   └── main.py
+│   └── tests/
+├── frontend/
+│   └── src/
+│       ├── app/            # pages: home, analyze/*, history, auth
+│       └── components/     # graphs, file analysis, tutorial, assistant
+├── docs/screenshots/
+├── docker-compose.dev.yml
+└── Makefile
+```
+
+---
+
+## Where it's headed
+
+In to the Repo already gives you a full picture of a codebase. Here's what comes next:
+
+- **Semantic code search:** ask "where do we validate tokens?" across the whole repo (the embeddings groundwork is already in place).
+- **Private repositories** through GitHub OAuth.
+- **More languages:** Go, Rust, Ruby, C# and Kotlin through additional Tree-sitter grammars.
+- **Onboarding paths:** an auto-generated "read these 10 files first" guide for new team members.
+- **PR impact analysis:** see which modules a pull request touches before you review it.
+- **Team workspaces:** share analyses, notes and guided tours across a team.
+- **A VS Code extension** that brings the maps and explanations into your editor.
+
+Interested in any of these, or in using In to the Repo at your company? See [Licensing](#license).
+
+---
+
+## Contributing
+
+Bug reports, ideas and pull requests are welcome. Please read the
+[Code of Conduct](CODE_OF_CONDUCT.md) first. By contributing, you agree that your
+contribution may be used as part of this project under its [license](LICENSE).
+
+---
+
+## Support the project
+
+If In to the Repo saves you time, please consider sponsoring its development. It funds
+the hosting and AI costs and keeps new features coming.
+
+<a href="https://github.com/sponsors/shanmuckh"><img src="https://img.shields.io/badge/Sponsor%20on%20GitHub-%E2%9D%A4-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor shanmuckh on GitHub"/></a>
+
+---
+
+## License
+
+**Copyright © 2026 Surakarapu Shanmukh Srinivas. All rights reserved.**
+
+In to the Repo is **source-available, not open source**. You may view the code and run it
+for personal, non-commercial learning and evaluation. **Any commercial use, redistribution,
+or derivative work requires prior written permission from the owner.** See [LICENSE](LICENSE)
+for the full terms, and reach out through [GitHub](https://github.com/shanmuckh) to ask about permissions.
+
+<div align="center">
+<br/>
+
+Built by **Surakarapu Shanmukh Srinivas** · [@shanmuckh](https://github.com/shanmuckh)
+
+</div>

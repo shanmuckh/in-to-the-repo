@@ -150,7 +150,7 @@ const tabs = [
         className=" z-10 max-w-3xl px-6 py-8 bg-neutral-900 backdrop-blur-md rounded-2xl shadow-xl"
         >
         <h1 className="text-3xl lg:text-4xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-400">
-          <span className='text-white'>Welcome to</span> Into the repo!
+          <span className='text-white'>Welcome to</span> In to the repo!
         </h1>
         <p className="text-lg text-neutral-300 mb-6 text-center">
           {`Hey! This is your starting point. Here's a quick guide to help you explore this platform effectively:`}

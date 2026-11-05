@@ -33,7 +33,7 @@ async def startup_event():
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    # "https://into-the-repo.vercel.app"
+    # "https://in-to-the-repo.vercel.app"
 ]
 
 if FRONTEND_HOST:

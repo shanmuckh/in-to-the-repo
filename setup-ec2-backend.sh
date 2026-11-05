@@ -3,7 +3,7 @@
 
 set -e
 
-echo "🚀 Into the Repo - Backend EC2 Setup"
+echo "🚀 In to the Repo - Backend EC2 Setup"
 echo "======================================="
 echo ""
 
@@ -33,10 +33,10 @@ echo ""
 # Create .env file
 cat > .env << EOF
 # Database Configuration
-DATABASE_URL=postgresql://repo_user:${DB_PASSWORD}@db:5432/into_the_repo
+DATABASE_URL=postgresql://repo_user:${DB_PASSWORD}@db:5432/in_to_the_repo
 DB_USER=repo_user
 DB_PASSWORD=${DB_PASSWORD}
-DB_NAME=into_the_repo
+DB_NAME=in_to_the_repo
 DB_PORT=5432
 
 # Redis Configuration
@@ -56,7 +56,7 @@ GEMINI_API_KEY=${GEMINI_API_KEY}
 BACKEND_PORT=8000
 LOG_LEVEL=info
 NODE_ENV=production
-FRONTEND_HOST=https://into-the-repo.vercel.app
+FRONTEND_HOST=https://in-to-the-repo.vercel.app
 EOF
 
 echo "✅ Created .env file"
@@ -66,27 +66,27 @@ echo ""
 echo "📋 Configuration Summary:"
 echo "-------------------------"
 echo "EC2 IP: ${EC2_IP}"
-echo "DuckDNS Domain: into-the-repo.duckdns.org"
-echo "Backend API (after SSL): https://into-the-repo.duckdns.org/docs"
+echo "DuckDNS Domain: in-to-the-repo.duckdns.org"
+echo "Backend API (after SSL): https://in-to-the-repo.duckdns.org/docs"
 echo "Database Password: ${DB_PASSWORD}"
 echo "Secret Key: ${SECRET_KEY:0:20}..."
 echo ""
 
 # Save credentials
 cat > ~/deployment-credentials.txt << EOF
-Into the Repo - Deployment Credentials
+In to the Repo - Deployment Credentials
 ======================================
 Generated on: $(date)
 
 EC2 Public IP: ${EC2_IP}
-DuckDNS Domain: into-the-repo.duckdns.org
+DuckDNS Domain: in-to-the-repo.duckdns.org
 Database Password: ${DB_PASSWORD}
 Secret Key: ${SECRET_KEY}
 
-Backend API: https://into-the-repo.duckdns.org/docs
+Backend API: https://in-to-the-repo.duckdns.org/docs
 
 Deploy frontend on Vercel with:
-NEXT_PUBLIC_HOST=https://into-the-repo.duckdns.org
+NEXT_PUBLIC_HOST=https://in-to-the-repo.duckdns.org
 
 IMPORTANT: Keep this file secure and delete after saving credentials elsewhere!
 EOF
@@ -109,7 +109,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     
     # Login to GitHub Container Registry
     echo "🔐 Logging into GitHub Container Registry..."
-    echo "${GITHUB_TOKEN}" | docker login ghcr.io -u gourav1632 --password-stdin
+    echo "${GITHUB_TOKEN}" | docker login ghcr.io -u shanmuckh --password-stdin
     
     # Pull images (much faster than building!)
     echo "📦 Pulling Docker images from GitHub Container Registry..."
@@ -136,12 +136,12 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "✅ Deployment complete!"
     echo ""
     echo "🌐 Access your backend:"
-    echo "   API Docs: https://into-the-repo.duckdns.org/docs"
+    echo "   API Docs: https://in-to-the-repo.duckdns.org/docs"
     echo "   (Initial access: http://${EC2_IP}/docs - will redirect to HTTPS once SSL is active)"
     echo ""
     echo "⚠️  IMPORTANT: Set up DuckDNS domain pointing to ${EC2_IP}"
     echo "   1. Go to https://www.duckdns.org"
-    echo "   2. Create subdomain: into-the-repo"
+    echo "   2. Create subdomain: in-to-the-repo"
     echo "   3. Point to IP: ${EC2_IP}"
     echo "   4. Caddy will automatically obtain SSL certificate"
     echo ""
@@ -150,12 +150,12 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "🛑 Stop: docker compose down"
     echo ""
     echo "🎨 Deploy frontend on Vercel:"
-    echo "   Set NEXT_PUBLIC_HOST=https://into-the-repo.duckdns.org"
+    echo "   Set NEXT_PUBLIC_HOST=https://in-to-the-repo.duckdns.org"
 else
     echo ""
     echo "Deployment skipped. To deploy manually later:"
     echo "  ln -sf docker-compose.backend.yml docker-compose.yml"
-    echo "  echo 'YOUR_TOKEN' | docker login ghcr.io -u gourav1632 --password-stdin"
+    echo "  echo 'YOUR_TOKEN' | docker login ghcr.io -u shanmuckh --password-stdin"
     echo "  docker compose pull"
     echo "  docker compose up -d"
 fi

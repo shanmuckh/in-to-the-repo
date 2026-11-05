@@ -35,7 +35,7 @@ HISTORY_DEPTH = int(os.getenv("GIT_HISTORY_DEPTH", "50"))
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 app = Celery(
-    'into_the_repo',
+    'in_to_the_repo',
     broker=REDIS_URL,
     backend=REDIS_URL,
     include=['src.tasks.worker']

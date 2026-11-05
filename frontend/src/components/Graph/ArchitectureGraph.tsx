@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ReactFlow, Controls } from '@xyflow/react';
 import type { Node as FlowNode } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { getLayoutedGraph } from '@/components/Graph/Layout';
+import { getLayoutedGraph, graphViewProps } from '@/components/Graph/Layout';
 import Loading from '../Loading';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Analysis, ASTFileData, ASTResult } from '@/types/repo_analysis_type';
@@ -118,7 +118,7 @@ function ArchitectureGraph() {
             <ReactFlow
               defaultNodes={nodes}
               defaultEdges={edges}
-              fitView
+              {...graphViewProps}
               proOptions={proOptions}
               onNodeClick={handleNodeClick}
               nodesDraggable

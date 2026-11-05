@@ -16,7 +16,7 @@ load_dotenv(dotenv_path=env_path)
 # Get database URL from environment or use default
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://repo_user:repo_password@localhost:5432/into_the_repo"
+    "postgresql://repo_user:repo_password@localhost:5432/in_to_the_repo"
 )
 
 # Create engine with connection pooling

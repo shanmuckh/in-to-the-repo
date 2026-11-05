@@ -1,0 +1,66 @@
+In to the Repo — Proprietary Source-Available License
+
+Copyright (c) 2026 Surakarapu Shanmukh Srinivas (GitHub: @shanmuckh).
+All rights reserved.
+
+This repository and everything in it — source code, documentation, designs,
+user interface, graphics, screenshots, and the name "In to the Repo"
+(together, the "Software") — is the exclusive property of Surakarapu Shanmukh
+Srinivas (the "Owner"). The Software is NOT open source. Making it publicly
+viewable does not place it in the public domain or grant any license except
+the limited permissions written below.
+
+1. PERMITTED USE (no permission needed)
+   You may, free of charge:
+   a) view and read the Software on GitHub;
+   b) clone or download it and run it on your own computer for personal,
+      non-commercial evaluation, learning, or study;
+   c) fork it on GitHub solely to propose changes back to this repository
+      through pull requests.
+
+2. RESTRICTIONS
+   Unless you have the Owner's prior written permission, you may NOT:
+   a) use the Software, or any part or derivative of it, for any commercial
+      purpose, including selling, licensing, sublicensing, renting, or leasing
+      it; offering it or features built from it as a hosted or paid service
+      (SaaS); using it inside a commercial product, internal business tool, or
+      client project; or using it to generate revenue in any way;
+   b) copy, publish, redistribute, or re-host the Software or substantial
+      portions of it, whether modified or unmodified;
+   c) create and distribute derivative works, or present the Software or its
+      design as your own work;
+   d) remove, hide, or change this license, copyright notices, or attribution;
+   e) use the name "In to the Repo", the Owner's name, or the Owner's
+      branding to endorse or promote any product or service;
+   f) use the Software or its contents to train, fine-tune, or evaluate
+      machine-learning or AI models.
+
+3. COMMERCIAL USE AND OTHER PERMISSIONS
+   Commercial use, redistribution, and any use not listed in Section 1 require
+   a separate written agreement signed by the Owner. To request permission,
+   contact the Owner through https://github.com/shanmuckh.
+
+4. CONTRIBUTIONS
+   By submitting a pull request, issue, or other contribution, you agree that
+   the Owner may use, modify, relicense, and distribute your contribution as
+   part of the Software, and you confirm you have the right to grant this.
+   Contributions do not give you any ownership of, or rights in, the Software.
+
+5. THIRD-PARTY COMPONENTS
+   Third-party libraries used by the Software remain under their own licenses.
+   This license applies only to the Owner's original work.
+
+6. TERMINATION
+   Any use outside these terms ends your permissions automatically and
+   immediately. On termination you must stop using the Software and delete
+   all copies in your possession.
+
+7. NO WARRANTY; LIMITATION OF LIABILITY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   OWNER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
+   ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN
+   CONNECTION WITH THE SOFTWARE OR THE USE OF OR OTHER DEALINGS IN THE SOFTWARE.
+
+All rights not expressly granted in this license are reserved by the Owner.

@@ -7,7 +7,7 @@ COMPOSE := docker compose -f docker-compose.dev.yml
 # Default target
 help:
 	@echo "================================"
-	@echo "Into the Repo - Make Commands"
+	@echo "In to the Repo - Make Commands"
 	@echo "================================"
 	@echo ""
 	@echo "Setup & Installation:"

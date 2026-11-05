@@ -28,7 +28,7 @@ export default function Home() {
 
       <div className="flex flex-col justify-center items-center gap-4 p-4 max-w-7xl  mx-auto relative z-10  w-full">
         <h1 className="text-5xl md:text-7xl font-bold text-center bg-clip-text text-transparent bg-linear-to-b from-neutral-50 to-neutral-400 bg-opacity-50">
-          Into the <span className="relative bg-clip-text text-transparent bg-no-repeat bg-linear-to-r from-purple-500 via-violet-500 to-pink-500 py-4">repo</span>
+          In to the <span className="relative bg-clip-text text-transparent bg-no-repeat bg-linear-to-r from-purple-500 via-violet-500 to-pink-500 py-4">repo</span>
         </h1>
         <p className="font-normal text-xl w-90 md:w-120 p-4 text-center text-neutral-300 ">
           {`A smarter way to explore codebases—because reading thousands of lines shouldn't feel like decoding ancient scripts.`}

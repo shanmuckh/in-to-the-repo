@@ -2,11 +2,11 @@ services:
   # PostgreSQL Database with pgvector extension
   db:
     image: pgvector/pgvector:pg16
-    container_name: into_the_repo_db
+    container_name: in_to_the_repo_db
     environment:
       POSTGRES_USER: ${DB_USER:-repo_user}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-repo_password}
-      POSTGRES_DB: ${DB_NAME:-into_the_repo}
+      POSTGRES_DB: ${DB_NAME:-in_to_the_repo}
       PGDATA: /var/lib/postgresql/data/pgdata
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
@@ -15,7 +15,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-repo_user} -d ${DB_NAME:-into_the_repo}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-repo_user} -d ${DB_NAME:-in_to_the_repo}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -26,7 +26,7 @@ services:
   # Redis Cache & Celery Broker
   redis:
     image: redis:7-alpine
-    container_name: into_the_repo_redis
+    container_name: in_to_the_repo_redis
     command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
     ports:
       - "6379:6379"
@@ -45,11 +45,11 @@ services:
 
   # FastAPI Backend API Server
   backend:
-    image: ghcr.io/gourav1632/into-the-repo/backend:latest
-    container_name: into_the_repo_backend
+    image: ghcr.io/shanmuckh/in-to-the-repo/backend:latest
+    container_name: in_to_the_repo_backend
     environment:
       # Database
-      DATABASE_URL: postgresql://${DB_USER:-repo_user}:${DB_PASSWORD:-repo_password}@db:5432/${DB_NAME:-into_the_repo}
+      DATABASE_URL: postgresql://${DB_USER:-repo_user}:${DB_PASSWORD:-repo_password}@db:5432/${DB_NAME:-in_to_the_repo}
       
       # Redis
       REDIS_URL: redis://redis:6379/0
@@ -91,11 +91,11 @@ services:
 
   # Celery Worker for Async Repository Analysis
   celery_worker:
-    image: ghcr.io/gourav1632/into-the-repo/backend:latest
-    container_name: into_the_repo_celery_worker
+    image: ghcr.io/shanmuckh/in-to-the-repo/backend:latest
+    container_name: in_to_the_repo_celery_worker
     environment:
       # Database
-      DATABASE_URL: postgresql://${DB_USER:-repo_user}:${DB_PASSWORD:-repo_password}@db:5432/${DB_NAME:-into_the_repo}
+      DATABASE_URL: postgresql://${DB_USER:-repo_user}:${DB_PASSWORD:-repo_password}@db:5432/${DB_NAME:-in_to_the_repo}
       
       # Redis
       REDIS_URL: redis://redis:6379/0
@@ -130,7 +130,7 @@ services:
   # Caddy Reverse Proxy with Auto SSL
   caddy:
     image: caddy:2-alpine
-    container_name: into_the_repo_caddy
+    container_name: in_to_the_repo_caddy
     ports:
       - "80:80"
       - "443:443"

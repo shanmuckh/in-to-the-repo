@@ -4,11 +4,11 @@ version: '3.8'
 services:
   db:
     image: pgvector/pgvector:pg16
-    container_name: into_the_repo_db_dev
+    container_name: in_to_the_repo_db_dev
     environment:
       POSTGRES_USER: repo_user
       POSTGRES_PASSWORD: repo_password
-      POSTGRES_DB: into_the_repo
+      POSTGRES_DB: in_to_the_repo
     ports:
       - "5432:5432"
     volumes:
@@ -18,7 +18,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: into_the_repo_redis_dev
+    container_name: in_to_the_repo_redis_dev
     ports:
       - "6379:6379"
     volumes:
@@ -31,9 +31,9 @@ services:
       context: ./backend
       dockerfile: dockerfile
       target: development
-    container_name: into_the_repo_backend_dev
+    container_name: in_to_the_repo_backend_dev
     environment:
-      DATABASE_URL: postgresql://repo_user:repo_password@db:5432/into_the_repo
+      DATABASE_URL: postgresql://repo_user:repo_password@db:5432/in_to_the_repo
       REDIS_URL: redis://redis:6379/0
       SECRET_KEY: dev-secret-key-not-for-production
       GITHUB_TOKEN: ${GITHUB_TOKEN}
@@ -56,9 +56,9 @@ services:
       context: ./backend
       dockerfile: dockerfile
       target: development
-    container_name: into_the_repo_celery_dev
+    container_name: in_to_the_repo_celery_dev
     environment:
-      DATABASE_URL: postgresql://repo_user:repo_password@db:5432/into_the_repo
+      DATABASE_URL: postgresql://repo_user:repo_password@db:5432/in_to_the_repo
       REDIS_URL: redis://redis:6379/0
       SECRET_KEY: dev-secret-key-not-for-production
       GITHUB_TOKEN: ${GITHUB_TOKEN}
@@ -79,7 +79,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    container_name: into_the_repo_frontend_dev
+    container_name: in_to_the_repo_frontend_dev
     environment:
       NEXT_PUBLIC_HOST: http://localhost:8000
     ports:
